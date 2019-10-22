@@ -1,3 +1,23 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright (C) 2019 Luca Baldini (luca.baldini@pi.infn.it)
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+"""Core logic for the pdf definition.
+"""
+
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
 from scipy.optimize import curve_fit
@@ -13,6 +33,14 @@ from matplotlib import pyplot as plt
 
 class ProbabilityDensityFunction(InterpolatedUnivariateSpline):
     ''' Class describing a probability density function.
+        
+    Parameters
+    ----------
+    x : array-like
+        The array of x values to be passed to the pdf.
+     
+    y : array-like
+        The array of y values to be passed to the pdf.
     '''
 
     def __init__(self, x, y, k=3):
@@ -30,93 +58,23 @@ class ProbabilityDensityFunction(InterpolatedUnivariateSpline):
 
     def prob(self, x1, x2):
         '''Return the probability fro the random variable to be included
-            between x1 and x2
+            between x1 and x2.
+        
+        Parameters
+        ----------
+        x1: flot or array-like
+            The left bound for the integration.
+        x2: float or array-like.
+            The rigth bound for the integration.
         '''
         return self.cdf(x2) - self.cdf(x1)
 
     def rnd(self, size=1000):
         '''Return an array of random values from the pdf.
+            
+        Parameters
+        ----------
+        size: int
+            The number of random numbers to extract.
         '''
         return self.ppf(np.random.uniform(size=size))
-
-def test_triangular():
-    '''Unit test with a triangular distribution.
-    '''
-    x = np.linspace(0. ,1., 101)
-    y = 2. * x
-    pdf = ProbabilityDensityFunction(x, y)
-    a = np.array([0.2, 0.6])
-    print(pdf(a))
-
-    plt.figure('pdf')
-    plt.plot(x, pdf(x))
-    plt.xlabel('x')
-    plt.ylabel('pdf (x)')
-
-    plt.figure('cdf')
-    plt.plot(x, pdf.cdf(x))
-    plt.xlabel('x')
-    plt.ylabel('cdf (x)')
-    
-    plt.figure('ppf')
-    q = np.linspace(0., 1., 250)
-    plt.plot(q, pdf.ppf(q))
-    plt.xlabel('q')
-    plt.ylabel('ppf (q)')
-    
-    plt.figure('Sampling')
-    rnd = pdf.rnd(100000)
-    plt.hist(rnd, bins=1000)
-
-def test_gaussian(mu=0., sigma=1., support=10., num_points=500):
-    '''Unit test with a gaussian distribution
-    '''
-    from scipy.stats import norm
-    x = np.linspace(-support * sigma, support * sigma, num_points)
-    x += mu
-    y = norm.pdf(x, mu, sigma)
-    plt.plot(x,y)
-    pdf = ProbabilityDensityFunction(x, y)
-    plt.figure('pdf')
-    plt.plot(x, pdf(x))
-    plt.xlabel('x')
-    plt.ylabel('pdf (x)')
-    
-    plt.figure('cdf')
-    plt.plot(x, pdf.cdf(x))
-    plt.xlabel('x')
-    plt.ylabel('cdf (x)')
-    
-    plt.figure('ppf')
-    q = np.linspace(0., 1., 250)
-    plt.plot(q, pdf.ppf(q))
-    plt.xlabel('q')
-    plt.ylabel('ppf (q)')
-    
-    plt.figure('Sampling')
-    rnd = pdf.rnd(100000)
-    ydata, edges, _ = plt.hist(rnd, bins=1000)
-    xdata = (edges[:-1] + edges[1:])/2
-
-    def f(x, C, mu, sigma):
-        return C * norm.pdf(x, mu, sigma)
-
-    popt, pcov = curve_fit(f, xdata, ydata)
-    print(popt)
-    print(np.sqrt(pcov.diagonal()))
-    _x = np.linspace(-10, 10, 500)
-    _y = f(_x, *popt)
-    plt.plot(_x, _y)
-
-    mask = ydata > 0
-    chi2 = sum(((ydata[mask] - f(xdata[mask], *popt)) / np.sqrt(ydata[mask]))**2)
-    nu = mask.sum() - 3
-    sigma = np.sqrt(2 * nu)
-    print(chi2, nu, sigma)
-    
-
-
-
-if __name__=='__main__':
-    test_gaussian()
-    plt.show()

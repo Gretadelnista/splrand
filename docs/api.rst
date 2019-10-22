@@ -3,5 +3,5 @@ API documentation
 
 pdf
 ----
-	automode:: pdf
-	:members: Greta 
+.. automodule:: pdf
+   :members:  

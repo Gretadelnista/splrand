@@ -1,17 +1,39 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright (C) 2019 Luca Baldini (luca.baldini@pi.infn.it)
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+'''Unit test for the pdf.
+'''
+
 import unittest
 import sys
 
 import numpy as np
-from splrand.pdf import ProbabilityDensityFunction
-from matplotlib import pyplot as plt
+from scipy.optimize import curve_fit
+import matplotlib.pyplot as plt
 if sys.flags.interactive:
     plt.ion()
 
-from scipy.optimize import curve_fit
+from splrand.pdf import ProbabilityDensityFunction
 
 class testPdf(unittest.TestCase):
-    ''' Unit test for the pdf.
+    
+    ''' Unit test for the pdf module.
     '''
+    
     def test_triangular(self):
         '''Unit test with a triangular distribution.
         '''
@@ -48,8 +70,8 @@ class testPdf(unittest.TestCase):
         x = np.linspace(-support * sigma, support * sigma, num_points)
         x += mu
         y = norm.pdf(x, mu, sigma)
-        plt.plot(x,y)
         pdf = ProbabilityDensityFunction(x, y)
+        
         plt.figure('pdf gaussian')
         plt.plot(x, pdf(x))
         plt.xlabel('x')
@@ -89,4 +111,4 @@ class testPdf(unittest.TestCase):
         self.assertTrue(abs(chi2-nu) < 5*sigma)
 
 if __name__=='__main__':
-    unittest.main(exit=not.sys.flags.interactive)
+    unittest.main(exit=not sys.flags.interactive)
